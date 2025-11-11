@@ -18,14 +18,22 @@ R_bi = TransformFromBodyToInertial([phi; theta; psi]);
 density = aircraft_parameters.rho; 
 [aero_forces, aero_moments] = AeroForcesAndMoments(aircraft_state, aircraft_surfaces, wind_inertial, density, aircraft_parameters);
 
-Fg_body = TransformFromInertialToBody([0; 0; aircraft_parameters.mass*aircraft_parameters.g], [phi; theta; psi]); 
+Fg_body = TransformFromInertialToBody([0; 0; -aircraft_parameters.m*aircraft_parameters.g], [phi; theta; psi]); 
 F_total_body = aero_forces - Fg_body;
 
-uEdot = r*vE - q*wE + F_total_body(1)/aircraft_parameters.mass;
-vEdot = p*wE - r*uE + F_total_body(2)/aircraft_parameters.mass;
-wEdot = q*uE - p*vE + F_total_body(3)/aircraft_parameters.mass;
+uEdot = r*vE - q*wE + F_total_body(1)/aircraft_parameters.m;
+vEdot = p*wE - r*uE + F_total_body(2)/aircraft_parameters.m;
+wEdot = q*uE - p*vE + F_total_body(3)/aircraft_parameters.m;
 
-I = aircraft_parameters.J; 
+Ixx = aircraft_parameters.Ix;
+Iyy = aircraft_parameters.Iy;
+Izz = aircraft_parameters.Iz;
+Ixz = aircraft_parameters.Ixz;
+
+I = [ Ixx  0   -Ixz;
+      0    Iyy  0;
+     -Ixz  0    Izz ];
+     
 omega = [p; q; r];
 omega_dot = I \ (aero_moments - cross(omega, I*omega));
 
@@ -56,5 +64,6 @@ xdot = [xEdot;
         pdot;
         qdot;
         rdot];
+
 
 end
