@@ -1,0 +1,60 @@
+function xdot = AircraftEOM(time, aircraft_state, aircraft_surfaces, wind_inertial, aircraft_parameters)
+
+xE    = aircraft_state(1);
+yE    = aircraft_state(2);
+zE    = aircraft_state(3);
+phi   = aircraft_state(4);
+theta = aircraft_state(5);
+psi   = aircraft_state(6);
+uE     = aircraft_state(7);
+vE     = aircraft_state(8);
+wE     = aircraft_state(9);
+p     = aircraft_state(10);
+q     = aircraft_state(11);
+r     = aircraft_state(12);
+
+R_bi = TransformFromBodyToInertial([phi; theta; psi]);
+
+density = aircraft_parameters.rho; 
+[aero_forces, aero_moments] = AeroForcesAndMoments(aircraft_state, aircraft_surfaces, wind_inertial, density, aircraft_parameters);
+
+Fg_body = TransformFromInertialToBody([0; 0; aircraft_parameters.mass*aircraft_parameters.g], [phi; theta; psi]); 
+F_total_body = aero_forces - Fg_body;
+
+uEdot = r*vE - q*wE + F_total_body(1)/aircraft_parameters.mass;
+vEdot = p*wE - r*uE + F_total_body(2)/aircraft_parameters.mass;
+wEdot = q*uE - p*vE + F_total_body(3)/aircraft_parameters.mass;
+
+I = aircraft_parameters.J; 
+omega = [p; q; r];
+omega_dot = I \ (aero_moments - cross(omega, I*omega));
+
+pdot = omega_dot(1);
+qdot = omega_dot(2);
+rdot = omega_dot(3);
+
+vel_body = [uE; vE; wE];
+vel_inertial = R_bi * vel_body;
+
+xEdot = vel_inertial(1);
+yEdot = vel_inertial(2);
+zEdot = vel_inertial(3);
+
+phi_dot   = p + q*sin(phi)*tan(theta) + r*cos(phi)*tan(theta);
+theta_dot = q*cos(phi) - r*sin(phi);
+psi_dot   = q*sin(phi)/cos(theta) + r*cos(phi)/cos(theta);
+
+xdot = [xEdot;
+        yEdot;
+        zEdot;
+        phi_dot;
+        theta_dot;
+        psi_dot;
+        uEdot;
+        vEdot;
+        wEdot;
+        pdot;
+        qdot;
+        rdot];
+
+end
