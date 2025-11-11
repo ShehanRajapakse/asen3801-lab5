@@ -15,7 +15,9 @@ r     = aircraft_state(12);
 
 R_bi = DCM_z(psi)*DCM_y(theta)*DCM_x(phi);
 
-density = aircraft_parameters.rho; 
+altitude = -zE;         
+density = stdatmo(altitude);
+
 [aero_forces, aero_moments] = AeroForcesAndMoments(aircraft_state, aircraft_surfaces, wind_inertial, density, aircraft_parameters);
 
 uEdot = r*vE - q*wE + aircraft_parameters.m*aircraft_parameters.g*(-sin(theta));
@@ -64,4 +66,5 @@ xdot = [xEdot;
 
 
 end
+
 
