@@ -13,17 +13,14 @@ p     = aircraft_state(10);
 q     = aircraft_state(11);
 r     = aircraft_state(12);
 
-R_bi = TransformFromBodyToInertial([phi; theta; psi]);
+R_bi = DCM_z(psi)*DCM_y(theta)*DCM_x(phi);
 
 density = aircraft_parameters.rho; 
 [aero_forces, aero_moments] = AeroForcesAndMoments(aircraft_state, aircraft_surfaces, wind_inertial, density, aircraft_parameters);
 
-Fg_body = TransformFromInertialToBody([0; 0; -aircraft_parameters.m*aircraft_parameters.g], [phi; theta; psi]); 
-F_total_body = aero_forces - Fg_body;
-
-uEdot = r*vE - q*wE + F_total_body(1)/aircraft_parameters.m;
-vEdot = p*wE - r*uE + F_total_body(2)/aircraft_parameters.m;
-wEdot = q*uE - p*vE + F_total_body(3)/aircraft_parameters.m;
+uEdot = r*vE - q*wE + aircraft_parameters.m*aircraft_parameters.g*(-sin(theta));
+vEdot = p*wE - r*uE + aircraft_parameters.m*aircraft_parameters.g*cos(theta)*sin(phi);
+wEdot = q*uE - p*vE + aircraft_parameters.m*aircraft_parameters.g*cos(theta)*cos(phi);
 
 Ixx = aircraft_parameters.Ix;
 Iyy = aircraft_parameters.Iy;
@@ -67,3 +64,4 @@ xdot = [xEdot;
 
 
 end
+
