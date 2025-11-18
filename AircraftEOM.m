@@ -13,7 +13,7 @@ p     = aircraft_state(10);
 q     = aircraft_state(11);
 r     = aircraft_state(12);
 
-R_bi = DCM_z(psi)*DCM_y(theta)*DCM_x(phi);
+R_bi = FromInertialToBody(phi, theta, psi)
 
 altitude = -zE;         
 density = stdatmo(altitude);
@@ -66,5 +66,6 @@ xdot = [xEdot;
 
 
 end
+
 
 
