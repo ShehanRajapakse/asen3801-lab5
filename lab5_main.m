@@ -186,8 +186,8 @@ x0_trim = [ ...
     20.99; 0; 0.5837; ...             % velocity [m/s]
     0; 0; 0 ];                        % angular rates [rad/s]
 
-u0_trim = [ ...
-    0.1079; 0; 0; 0.3182 ];           % [elevator, aileron, rudder, throttle]
+aircraft_surface = rad2deg([ ...
+    0.1079; 0; 0; 0.3182 ]);           % [elevator, aileron, rudder, throttle]
 
 % Disturbed initial condition
 x0_dist = [ ...
@@ -200,10 +200,10 @@ u0_dist = [ ...
     deg2rad(5); deg2rad(2); deg2rad(-13); 0.3 ];
 
 %% --- Simulation #1: Trim Condition ---
-[t_trim, x_trim] = ode45(@(t,x) AircraftEOM(t, x, u0_trim, wind_inertial, aircraft_parameters), tspan, x0_trim);
+[t_trim, x_trim] = ode45(@(t,x) AircraftEOM(t, x, aircraft_surface, wind_inertial, aircraft_parameters), tspan, x0_trim);
 
 % Save control history (constant here)
-cInp_trim = repmat(u0_trim', length(t_trim), 1);
+cInp_trim = repmat(aircraft_surface', length(t_trim), 1);
 
 %% --- Simulation #2: Disturbed Condition ---
 [t_dist, x_dist] = ode45(@(t,x) AircraftEOM(t, x, u0_dist, wind_inertial, aircraft_parameters), tspan, x0_dist);
@@ -219,3 +219,14 @@ PlotAircraftSim_lab5(t_trim, x_trim, cInp_trim, 1, 'b');
 PlotAircraftSim_lab5(t_dist, x_dist, cInp_dist, 1, 'r--');
 
 legend('Trim Case', 'Disturbed Case');
+
+
+doublet_time = 0.25;
+doublet_size = 15;
+tspan_doub = [0 3];
+
+[t_dist_doub, x_dist_doub] = ode45(@(t,x) AircraftEOMDoublet(t, x, aircraft_surface,doublet_size,doublet_time, wind_inertial, aircraft_parameters), tspan_doub, x0_trim);
+
+cInp_doub = repmat(aircraft_surface', length(t_dist_doub), 1);
+
+PlotAircraftSim_lab5(t_dist_doub, x_dist_doub, cInp_doub, 1, 'r--');
